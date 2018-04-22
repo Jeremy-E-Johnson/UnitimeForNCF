@@ -1,4 +1,5 @@
 .room-card {
+  z-index: 5;
   width: 650px;
   height: 325px;
   display: block;
