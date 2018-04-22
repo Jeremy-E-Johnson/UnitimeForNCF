@@ -68,3 +68,20 @@
 .room-card-content .room-card-feature i {
   margin-right: 7px;
 }
+.slide-fade-enter-active, .slide-fade-leave-active {
+  transition: all .3s ease;
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(-30px);
+  opacity: 0;
+}
+.tooltip {
+  position: absolute;
+  left: 350px;
+  top: 100px;
+  width: auto;
+  height: auto;
+}
+#map {
+  margin: 350px 400px;
+}
