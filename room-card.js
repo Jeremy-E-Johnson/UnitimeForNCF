@@ -1,3 +1,129 @@
+Vue.component('map-manager', {
+  props: ['rooms', 'map'],
+  data: function() {
+    return {
+      show: false,
+      currentRoomName: false,
+      isRoomActive: false,
+      isTooltipActive: false,
+      currentRoomBoundingBox: false
+    };
+  },
+  template: `
+    <div>
+      <tooltip
+        v-if="show"
+        v-bind:el="currentRoomBoundingBox"
+        v-bind:room="currentRoom"
+        v-on:active="isTooltipActive = true"
+        v-on:close="isTooltipActive = false">
+      </tooltip>
+      <object id="map" v-bind:data="map" type="image/svg+xml"></object>
+    </div>
+  `,
+  mounted: function() {
+    var vm = this;
+    this.$nextTick(function() {
+      document.getElementById('map').addEventListener('load', function() {
+        var doc = this.getSVGDocument();
+        vm.registerRooms(doc);
+      })
+    });
+  },
+  computed: {
+    currentRoom: function() {
+      if (this.currentRoomName) {
+        return this.rooms[this.currentRoomName];
+      }
+
+      return false;
+    },
+    currentEl: function() {
+      if (this.currentRoomName) {
+        return 'room-' + this.currentRoomName;
+      }
+
+      return false;
+    }
+  },
+  watch: {
+    isRoomActive: function() {
+      this.update();
+    },
+    isTooltipActive: function() {
+      this.update();
+    }
+  },
+  methods: {
+    setCurrentRoomName: function(room) {
+      this.currentRoomName = room;
+      this.isRoomActive = true;
+    },
+    update: _.debounce(function() {
+      if (this.isTooltipActive || this.isRoomActive) {
+        this.show = true;
+      }
+      else {
+        this.show = false;
+      }
+    }, 50),
+    registerRooms: function(doc) {
+      var vm = this;
+
+      Object.keys(this.rooms).forEach(function(key) {
+        var el = doc.querySelector('#room-' + key);
+
+        var elBoundingBox = el.getBoundingClientRect();
+
+        el.addEventListener('mouseover', function() {
+          vm.setCurrentRoomName(key);
+          vm.currentRoomBoundingBox = elBoundingBox;
+        });
+
+        el.addEventListener('mouseleave', function() {
+          vm.isRoomActive = false;
+        });
+      });
+    }
+  }
+});
+
+Vue.component('tooltip', {
+  props: ['el', 'room'],
+  data: function() {
+    return {
+      width: 650,
+      height: 325
+    };
+  },
+  template: `
+    <transition name="slide-fade">
+      <div
+        class="tooltip"
+        ref="tooltip"
+        v-bind:style="styleObject"
+        v-on:mouseover="$emit('active')"
+        v-on:mouseleave="$emit('close')">
+        <room-card v-bind:room="room"></room-card>
+      </div>
+    </transition>
+  `,
+  computed: {
+    left: function() {
+      return this.el.left - (this.width / 3);
+    },
+    top: function() {
+      return this.el.top - this.height;
+    },
+    styleObject: function() {
+      return {
+        left: (this.left + 350) + 'px',
+        top: (this.top + 350) + 'px'
+      };
+    }
+  }
+});
+
 var formatFeature = {
   exclusive: {
     show: function(value) {
