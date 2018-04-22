@@ -82,11 +82,11 @@ var formatFeature = {
   },
   computers: {
     show: function(value) {
-      return value === 'Y';
+      return value > 0;
     },
     content: function(value) {
       return `
-        <i class="fas fa-desktop"></i> Includes computers
+        <i class="fas fa-desktop"></i> ${value} computer(s) are available 
       `;
     }
   },
