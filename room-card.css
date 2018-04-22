@@ -1,0 +1,69 @@
+.room-card {
+  width: 650px;
+  height: 325px;
+  display: block;
+  border: 1px solid rgb(242, 242, 242);
+  background: rgb(253, 253, 253);
+}
+.centered {
+  margin: 75px auto;
+}
+.room-card-thumbnail, .room-card-content {
+  width: 50%;
+  height: auto;
+  display: inline-block;
+  float: left;
+}
+.room-card-thumbnail {
+  height: 100%;
+}
+.room-card-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.room-card-content {
+  color: rgb(62, 62, 62);
+  font-family: sans-serif;
+}
+.room-card-content-inner {
+  padding: 35px;
+}
+.room-card-content .header,
+.room-card-content .header .name,
+.room-card-content .header .nickname {
+  display: inline-block;
+  width: 100%;
+}
+.room-card-content .header .name {
+  font-weight: bold;
+  font-size: 1.5em;
+}
+.room-card-content .header .nickname {
+  font-style: italic;
+  font-size: 1em;
+}
+.room-card-content .description, .room-card-content .room-card-feature-list {
+  margin: 15px 0;
+  font-size: 0.85em;
+  font-weight: lighter;
+  color: rgb(103, 103, 103);
+}
+.room-card-content .room-card-feature-list {
+  margin-top: 25px;
+}
+.room-card-content .room-card-feature-list ul {
+  margin: 0;
+  padding: 0;
+}
+.room-card-content .room-card-feature-list ul {
+  margin: 0;
+  padding: 0;
+}
+.room-card-content .room-card-feature {
+  padding: 5px;
+  font-size: 0.75em;
+}
+.room-card-content .room-card-feature i {
+  margin-right: 7px;
+}
