@@ -18,18 +18,13 @@ Vue.component('map-manager', {
         v-on:active="isTooltipActive = true"
         v-on:close="isTooltipActive = false">
       </tooltip>
-      <object id="map" v-bind:data="map" type="image/svg+xml"></object>
+      <room-map
+        class="centered"
+        v-bind:map="map"
+        v-on:loaded="registerRooms">
+      </room-map>
     </div>
   `,
-  mounted: function() {
-    var vm = this;
-    this.$nextTick(function() {
-      document.getElementById('map').addEventListener('load', function() {
-        var doc = this.getSVGDocument();
-        vm.registerRooms(doc);
-      })
-    });
-  },
   computed: {
     currentRoom: function() {
       if (this.currentRoomName) {
@@ -55,10 +50,6 @@ Vue.component('map-manager', {
     }
   },
   methods: {
-    setCurrentRoomName: function(room) {
-      this.currentRoomName = room;
-      this.isRoomActive = true;
-    },
     update: _.debounce(function() {
       if (this.isTooltipActive || this.isRoomActive) {
         this.show = true;
@@ -71,18 +62,23 @@ Vue.component('map-manager', {
       var vm = this;
 
       Object.keys(this.rooms).forEach(function(key) {
-        var el = doc.querySelector('#room-' + key);
+        vm.registerRoom(
+          key,
+          doc.querySelector('#room-' + key)
+        );
+      });
+    },
+    registerRoom: function(room, el) {
+      var vm = this;
 
-        var elBoundingBox = el.getBoundingClientRect();
+      el.addEventListener('mouseover', function() {
+        vm.currentRoomName = room;
+        vm.isRoomActive = true;
+        vm.currentRoomBoundingBox = el.getBoundingClientRect();
+      });
 
-        el.addEventListener('mouseover', function() {
-          vm.setCurrentRoomName(key);
-          vm.currentRoomBoundingBox = elBoundingBox;
-        });
-
-        el.addEventListener('mouseleave', function() {
-          vm.isRoomActive = false;
-        });
+      el.addEventListener('mouseleave', function() {
+        vm.isRoomActive = false;
       });
     }
   }
@@ -110,16 +106,51 @@ Vue.component('tooltip', {
   `,
   computed: {
     left: function() {
-      return this.el.left - (this.width / 3);
+      var shift = this.width / 8;
+      if (this.el.left <= shift) {
+        return this.el.left + shift;
+      }
+
+      return this.el.left - shift;
     },
     top: function() {
+      var buffer = 50;
+      if (this.el.top <= this.height + buffer) {
+        return this.el.top + this.el.height;
+      }
+
       return this.el.top - this.height;
     },
     styleObject: function() {
       return {
-        left: (this.left + 350) + 'px',
-        top: (this.top + 350) + 'px'
+        left: this.left + 'px',
+        top: this.top + 'px'
       };
+    }
+  }
+});
+
+Vue.component('room-map', {
+  props: ['map'],
+  template: `
+    <div
+      ref="container"
+      v-bind:style="map.style">
+    </div>
+  `,
+  mounted: function() {
+    this.$nextTick(this.loadMap)
+  },
+  methods: {
+    loadMap: function() {
+      this.$refs.container.innerHTML = this.map.source;
+
+      var doc = this.$refs.container.getElementsByTagName('svg');
+
+      if (doc.length === 1) {
+        doc = doc[0];
+        this.$emit('loaded', doc);
+      }
     }
   }
 });
@@ -212,7 +243,7 @@ var formatFeature = {
     },
     content: function(value) {
       return `
-        <i class="fas fa-desktop"></i> ${value} computer(s) are available 
+        <i class="fas fa-desktop"></i> ${value} computer(s) are available
       `;
     }
   },
