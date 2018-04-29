@@ -267,6 +267,16 @@ var formatFeature = {
         <i class="fas fa-plug"></i> Includes outlets
       `;
     }
+  },
+  lab: {
+    show: function(value) {
+      return value === 'Y';
+    },
+    content: function(value) {
+      return `
+        <i class="fas fa-flask"></i> Lab room
+      `;
+    }
   }
 };
 
