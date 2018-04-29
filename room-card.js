@@ -6,7 +6,7 @@ Vue.component('map-manager', {
       currentRoomName: false,
       isRoomActive: false,
       isTooltipActive: false,
-      currentRoomBoundingBox: false
+      roomInfo: {}
     };
   },
   template: `
@@ -26,19 +26,23 @@ Vue.component('map-manager', {
     </div>
   `,
   computed: {
-    currentRoom: function() {
+    selectedRoom: function() {
       if (this.currentRoomName) {
-        return this.rooms[this.currentRoomName];
+        return this.currentRoomName;
       }
-
-      return false;
+      return undefined;
+    },
+    currentRoom: function() {
+      if (this.selectedRoom) {
+        return this.rooms[this.selectedRoom];
+      }
+      return undefined;
     },
     currentEl: function() {
-      if (this.currentRoomName) {
-        return 'room-' + this.currentRoomName;
+      if (this.selectedRoom) {
+        return 'room-' + this.selectedRoom;
       }
-
-      return false;
+      return undefined;
     }
   },
   watch: {
@@ -70,13 +74,11 @@ Vue.component('map-manager', {
     },
     registerRoom: function(room, el) {
       var vm = this;
-
       el.addEventListener('mouseover', function() {
+        vm.currentRoomBoundingBox = el.getBoundingClientRect();
         vm.currentRoomName = room;
         vm.isRoomActive = true;
-        vm.currentRoomBoundingBox = el.getBoundingClientRect();
       });
-
       el.addEventListener('mouseleave', function() {
         vm.isRoomActive = false;
       });
@@ -88,8 +90,9 @@ Vue.component('tooltip', {
   props: ['el', 'room'],
   data: function() {
     return {
-      width: 650,
-      height: 325
+      width: 0,
+      height: 0,
+      styleObject: {}
     };
   },
   template: `
@@ -104,6 +107,14 @@ Vue.component('tooltip', {
       </div>
     </transition>
   `,
+  mounted: function() {
+    var vm = this;
+    this.$nextTick(function() {
+      vm.width  = vm.$refs.tooltip.clientWidth;
+      vm.height = vm.$refs.tooltip.clientHeight;
+      vm.calculatePosition();
+    });
+  },
   computed: {
     left: function() {
       var shift = this.width / 8;
@@ -120,9 +131,11 @@ Vue.component('tooltip', {
       }
 
       return this.el.top - this.height;
-    },
-    styleObject: function() {
-      return {
+    }
+  },
+  methods: {
+    calculatePosition: function() {
+      this.styleObject = {
         left: this.left + 'px',
         top: this.top + 'px'
       };
@@ -199,7 +212,7 @@ var formatFeature = {
       return numWhiteboards > 0 || numBlackboards > 0;
     },
     content: function(value) {
-      var snippet = "";
+      var snippet = "Has ";
 
       var numWhiteboards = (value.match(/W/g) || []).length;
       var numBlackboards = (value.match(/B/g) || []).length;
@@ -219,8 +232,6 @@ var formatFeature = {
           snippet += "s";
         }
       }
-
-      snippet += " are available";
 
       return `
         <i class="fas fa-magic"></i> ${snippet}
@@ -271,17 +282,43 @@ Vue.component('room-card', {
 
 Vue.component('room-card-thumbnail', {
   props: ['thumbnails'],
+  data: function() {
+    return {
+      loading: true
+    };
+  },
   template: `
     <div v-if="hasThumbnails" class="room-card-thumbnail" title="An image of the room from inside">
-      <img v-bind:src="thumbnailPreview">
+      <transition v-if="loaded">
+        <img v-bind:src="thumbnailPreview">
+      </transition>
     </div>
   `,
+  watch: {
+    thumbnails: {
+      immediate: true,
+      handler: function(thumbnail) {
+        this.loading = true;
+        var image   = new Image();
+        image.onload = this.updateThumbnail;
+        image.src    = this.thumbnailPreview;
+      }
+    }
+  },
   computed: {
+    loaded: function() {
+      return !this.loading;
+    },
     thumbnailPreview: function() {
       return this.thumbnails[0].source;
     },
     hasThumbnails: function() {
       return this.thumbnails.length > 0;
+    }
+  },
+  methods: {
+    updateThumbnail: function() {
+      this.loading = false;
     }
   }
 });
