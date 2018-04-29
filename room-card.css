@@ -1,13 +1,13 @@
 .room-card {
   z-index: 5;
-  width: 650px;
-  height: 325px;
+  width: 480px;
+  height: 220px;
   display: block;
   border: 1px solid rgb(242, 242, 242);
   background: rgb(253, 253, 253);
 }
 .room-card-thumbnail, .room-card-content {
-  width: 50%;
+  width: 40%;
   height: auto;
   display: inline-block;
   float: left;
@@ -23,9 +23,11 @@
 .room-card-content {
   color: rgb(62, 62, 62);
   font-family: sans-serif;
+  width: 60%;
 }
 .room-card-content-inner {
   padding: 35px;
+  padding: 15px;
 }
 .room-card-content .header,
 .room-card-content .header .name,
@@ -35,20 +37,20 @@
 }
 .room-card-content .header .name {
   font-weight: bold;
-  font-size: 1.5em;
+  font-size: 1em;
 }
 .room-card-content .header .nickname {
   font-style: italic;
-  font-size: 1em;
+  font-size: 0.85em;
 }
 .room-card-content .description, .room-card-content .room-card-feature-list {
-  margin: 15px 0;
-  font-size: 0.85em;
+  margin: 10px 0;
+  font-size: 0.75em;
   font-weight: lighter;
   color: rgb(103, 103, 103);
 }
 .room-card-content .room-card-feature-list {
-  margin-top: 25px;
+  /* margin-top: 10px; */
 }
 .room-card-content .room-card-feature-list ul {
   margin: 0;
@@ -59,23 +61,68 @@
   padding: 0;
 }
 .room-card-content .room-card-feature {
-  padding: 5px;
+  padding: 3px;
   font-size: 0.75em;
 }
 .room-card-content .room-card-feature i {
   margin-right: 7px;
 }
-.slide-fade-enter-active, .slide-fade-leave-active {
+.slide-fade-enter-active, .slide-fade-leave-active,
+.fade-enter-active, .fade-leave-active {
   transition: all .3s ease;
 }
 .slide-fade-enter, .slide-fade-leave-to {
   transform: translateY(-30px);
   opacity: 0;
 }
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
 .tooltip {
   position: absolute;
-  left: 350px;
-  top: 100px;
   width: auto;
   height: auto;
+}
+/* https://projects.lukehaas.me/css-loaders/ */
+.loader,
+.loader:after {
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+}
+.loader {
+  z-index: 50;
+  margin: 60px auto;
+  font-size: 10px;
+  position: relative;
+  text-indent: -9999em;
+  border-top: 1.1em solid rgba(65, 123, 184, 0.2);
+  border-right: 1.1em solid rgba(65, 123, 184, 0.2);
+  border-bottom: 1.1em solid rgba(65, 123, 184, 0.2);
+  border-left: 1.1em solid #ffffff;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+}
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
 }
