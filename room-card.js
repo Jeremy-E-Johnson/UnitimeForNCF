@@ -310,6 +310,9 @@ Vue.component('room-card-thumbnail', {
       handler: function(thumbnail) {
         this.loading = true;
         var image   = new Image();
+        image.onerror = function() {
+          alert('it works!');
+        };
         image.onload = this.updateThumbnail;
         image.src    = this.thumbnailPreview;
       }
