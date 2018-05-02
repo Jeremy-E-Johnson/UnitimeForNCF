@@ -156,14 +156,31 @@ Vue.component('room-map', {
   },
   methods: {
     loadMap: function() {
-      this.$refs.container.innerHTML = this.map.source;
+      var vm = this;
 
-      var doc = this.$refs.container.getElementsByTagName('svg');
+      var floorplan = document.createElement('html');
+      floorplan.innerHTML = vm.map.source;
+      var image = floorplan.getElementsByTagName('image');
 
-      if (doc.length === 1) {
-        doc = doc[0];
-        this.$emit('loaded', doc);
+      if (image.length === 0) {
+        vm.$emit('error');
       }
+
+      image = image[0];
+
+      var href = image.href.baseVal;
+
+      GoogleAccount.then(function(ncfAccount) {
+        floorplan.querySelector('image')
+          .setAttributeNS('http://www.w3.org/1999/xlink', 'href', href + '?authuser=' + ncfAccount);
+        vm.$refs.container.innerHTML = floorplan.innerHTML;
+
+        var doc = vm.$refs.container.getElementsByTagName('svg');
+        if (doc.length === 1) {
+          doc = doc[0];
+          vm.$emit('loaded', doc)
+        }
+      });
     }
   }
 });
@@ -294,27 +311,29 @@ Vue.component('room-card-thumbnail', {
   props: ['thumbnails'],
   data: function() {
     return {
-      loading: true
+      loading: true,
+      thumbnailSource: ''
     };
   },
   template: `
     <div v-if="hasThumbnails" class="room-card-thumbnail" title="An image of the room from inside">
       <transition v-if="loaded">
-        <img v-bind:src="thumbnailPreview">
+         <img v-bind:src="thumbnailPreviewSource">
       </transition>
     </div>
   `,
   watch: {
     thumbnails: {
       immediate: true,
-      handler: function(thumbnail) {
-        this.loading = true;
-        var image   = new Image();
-        image.onerror = function() {
-          alert('it works!');
-        };
-        image.onload = this.updateThumbnail;
-        image.src    = this.thumbnailPreview;
+      handler: function(thumbnails) {
+        var vm = this;
+        vm.loading = true;
+        GoogleAccount.then(function(ncfAccount) {
+          var image = new Image();
+          image.onload = vm.updateThumbnail;
+          vm.thumbnailPreviewSource = vm.thumbnailPreview.source + '?authuser=' + ncfAccount;
+          image.src = vm.thumbnailPreviewSource;
+        });
       }
     }
   },
@@ -323,7 +342,7 @@ Vue.component('room-card-thumbnail', {
       return !this.loading;
     },
     thumbnailPreview: function() {
-      return this.thumbnails[0].source;
+      return this.thumbnails[0];
     },
     hasThumbnails: function() {
       return this.thumbnails.length > 0;
@@ -418,4 +437,21 @@ Vue.component('room-card-feature', {
       return formatFeature[this.feature.name].content(this.feature.value);
     }
   }
+});
+
+var GoogleAccount = new Promise(function(resolve, reject) {
+  var currentAccountAttempt = 0;
+  var src = 'https://lh3.google.com/u/0/d/1THcZzSmyW7XlJhhC-c2Z_feIM3Hr0psR=w2559-h1452-iv1?authuser=';
+  var image = new Image();
+
+  image.onload = function() {
+    resolve(currentAccountAttempt);
+  };
+
+  image.onerror = function() {
+    currentAccountAttempt += 1;
+    image.src = src + currentAccountAttempt;
+  };
+
+  image.src = src + currentAccountAttempt;
 });
