@@ -9,7 +9,7 @@
   background: rgb(253, 253, 253);
 }
 .room-card-thumbnail, .room-card-content {
-  height: auto;
+  height: 100%;
   display: inline-block;
   float: left;
 }
