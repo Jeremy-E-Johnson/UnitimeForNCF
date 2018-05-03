@@ -1,3 +1,4 @@
+
 Vue.component('map-manager', {
   props: ['rooms', 'map'],
   data: function() {
@@ -185,126 +186,21 @@ Vue.component('room-map', {
   }
 });
 
-var formatFeature = {
-  exclusive: {
-    show: function(value) {
-      return true;
-    },
-    content: function(value) {
-      var snippet = "Anyone can use this room";
-      if (value.length > 0) {
-        snippet = "Typically used by " + value;
-      }
-
-      return `
-        <i class="fas fa-graduation-cap"></i> ${snippet}
-      `;
-    }
-  },
-  capacity: {
-    show: function(value) {
-      return true;
-    },
-    content: function(value) {
-      return `
-        <i class="fas fa-users"></i> Room for ${value} people
-      `;
-    }
-  },
-  projectors: {
-    show: function(value) {
-      return value === 'Y';
-    },
-    content: function(value) {
-      return `
-        <i class="fas fa-video"></i> Includes a projector
-      `;
-    }
-  },
-  boards: {
-    show: function(value) {
-      var numWhiteboards = (value.match(/W/g) || []).length;
-      var numBlackboards = (value.match(/B/g) || []).length;
-
-      return numWhiteboards > 0 || numBlackboards > 0;
-    },
-    content: function(value) {
-      var snippet = "Has ";
-
-      var numWhiteboards = (value.match(/W/g) || []).length;
-      var numBlackboards = (value.match(/B/g) || []).length;
-
-      if (numWhiteboards > 0) {
-        snippet += numWhiteboards + " whiteboard";
-
-        if (numWhiteboards > 1) {
-          snippet += "s";
-        }
-      }
-
-      if (numBlackboards > 0) {
-        snippet += " and " + numBlackboards + " blackboard";
-
-        if (numBlackboards > 1) {
-          snippet += "s";
-        }
-      }
-
-      return `
-        <i class="fas fa-magic"></i> ${snippet}
-      `;
-    }
-  },
-  rearrangableFurniture: {
-    show: function(value) {
-      return value === 'Y';
-    },
-    content: function(value) {
-      return `
-        <i class="fas fa-couch"></i> Furniture is rearrangable
-      `;
-    }
-  },
-  computers: {
-    show: function(value) {
-      return value > 0;
-    },
-    content: function(value) {
-      return `
-        <i class="fas fa-desktop"></i> ${value} computer(s) are available
-      `;
-    }
-  },
-  outlets: {
-    show: function(value) {
-      return value === 'Y';
-    },
-    content: function(value) {
-      return `
-        <i class="fas fa-plug"></i> Includes outlets
-      `;
-    }
-  },
-  lab: {
-    show: function(value) {
-      return value === 'Y';
-    },
-    content: function(value) {
-      return `
-        <i class="fas fa-flask"></i> Lab room
-      `;
-    }
-  }
-};
-
 Vue.component('room-card', {
   props: ['room'],
   template: `
-    <div class="room-card">
+    <div class="room-card" v-bind:class="classObject">
       <room-card-thumbnail v-bind:thumbnails="room.thumbnails"></room-card-thumbnail>
       <room-card-content v-bind:room="room"></room-card-content>
     </div>
-  `
+  `,
+  computed: {
+    classObject: function() {
+      return {
+        'no-thumbnail': this.room.thumbnails.length === 0
+      };
+    }
+  }
 });
 
 Vue.component('room-card-thumbnail', {
@@ -327,6 +223,11 @@ Vue.component('room-card-thumbnail', {
       immediate: true,
       handler: function(thumbnails) {
         var vm = this;
+
+        if (vm.isMissingThumbnails) {
+          return;
+        }
+
         vm.loading = true;
         GoogleAccount.then(function(ncfAccount) {
           var image = new Image();
@@ -346,6 +247,9 @@ Vue.component('room-card-thumbnail', {
     },
     hasThumbnails: function() {
       return this.thumbnails.length > 0;
+    },
+    isMissingThumbnails: function() {
+      return !this.hasThumbnails;
     }
   },
   methods: {
@@ -460,3 +364,115 @@ var GoogleAccount = new Promise(function(resolve, reject) {
 
   image.src = src + currentAccountAttempt;
 });
+
+var formatFeature = {
+  exclusive: {
+    show: function(value) {
+      return true;
+    },
+    content: function(value) {
+      var snippet = "Anyone can use this room";
+      if (value.length > 0) {
+        snippet = "Typically used by " + value;
+      }
+
+      return `
+        <i class="fas fa-graduation-cap"></i> ${snippet}
+      `;
+    }
+  },
+  capacity: {
+    show: function(value) {
+      return true;
+    },
+    content: function(value) {
+      return `
+        <i class="fas fa-users"></i> Room for ${value} people
+      `;
+    }
+  },
+  projectors: {
+    show: function(value) {
+      return value === 'Y';
+    },
+    content: function(value) {
+      return `
+        <i class="fas fa-video"></i> Includes a projector
+      `;
+    }
+  },
+  boards: {
+    show: function(value) {
+      var numWhiteboards = (value.match(/W/g) || []).length;
+      var numBlackboards = (value.match(/B/g) || []).length;
+
+      return numWhiteboards > 0 || numBlackboards > 0;
+    },
+    content: function(value) {
+      var snippet = "Has ";
+
+      var numWhiteboards = (value.match(/W/g) || []).length;
+      var numBlackboards = (value.match(/B/g) || []).length;
+
+      if (numWhiteboards > 0) {
+        snippet += numWhiteboards + " whiteboard";
+
+        if (numWhiteboards > 1) {
+          snippet += "s";
+        }
+      }
+
+      if (numBlackboards > 0) {
+        snippet += " and " + numBlackboards + " blackboard";
+
+        if (numBlackboards > 1) {
+          snippet += "s";
+        }
+      }
+
+      return `
+        <i class="fas fa-magic"></i> ${snippet}
+      `;
+    }
+  },
+  rearrangableFurniture: {
+    show: function(value) {
+      return value === 'Y';
+    },
+    content: function(value) {
+      return `
+        <i class="fas fa-couch"></i> Furniture is rearrangable
+      `;
+    }
+  },
+  computers: {
+    show: function(value) {
+      return value > 0;
+    },
+    content: function(value) {
+      return `
+        <i class="fas fa-desktop"></i> ${value} computer(s) are available
+      `;
+    }
+  },
+  outlets: {
+    show: function(value) {
+      return value === 'Y';
+    },
+    content: function(value) {
+      return `
+        <i class="fas fa-plug"></i> Includes outlets
+      `;
+    }
+  },
+  lab: {
+    show: function(value) {
+      return value === 'Y';
+    },
+    content: function(value) {
+      return `
+        <i class="fas fa-flask"></i> Lab room
+      `;
+    }
+  }
+};
