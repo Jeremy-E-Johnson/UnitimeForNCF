@@ -440,6 +440,7 @@ Vue.component('room-card-feature', {
 });
 
 var GoogleAccount = new Promise(function(resolve, reject) {
+  var maxAttempts = 15;
   var currentAccountAttempt = 0;
   var src = 'https://lh3.google.com/u/0/d/1THcZzSmyW7XlJhhC-c2Z_feIM3Hr0psR=w2559-h1452-iv1?authuser=';
   var image = new Image();
@@ -449,6 +450,10 @@ var GoogleAccount = new Promise(function(resolve, reject) {
   };
 
   image.onerror = function() {
+    if (currentAccountAttempt > maxAttempts) {
+      reject('could not find user account');
+    }
+
     currentAccountAttempt += 1;
     image.src = src + currentAccountAttempt;
   };
